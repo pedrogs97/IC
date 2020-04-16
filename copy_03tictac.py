@@ -28,12 +28,29 @@ from numpy import loadtxt
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+def plotarResultados(resultado, titulo, ylabel, xlabel):
+    plt.plot(resultado)
+    plt.title(titulo)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.show()
+
 """CATEGORIZANDO OS DADOS DE SAIDA"""
 
 numpydados = loadtxt('tic-tac-toe.csv', delimiter=",")
 
-X = numpydados[:,0:9] #Valores de entrada
-Y = numpydados[:,9] #Valores de saida
+Xtotal = numpydados[:,0:9] #Valores de entrada
+Ytotal = numpydados[:,9] #Valores de saida
+
+X = numpydados[0:897, :9] #Valores de entrada
+Y = numpydados[0:897, 9] #Valores de saida
+
+Z = numpydados[898: , :9] #Valores de entrada
+W = numpydados[898: , 9] #Valores de saida
+
+
+# 1  -> 897 - Treinamento
+# 898-> EOF - Teste
 
 print (X)
 print (Y)
@@ -50,10 +67,31 @@ model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=0.12),
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(X, Y, epochs=250) #Treinamento
+seqModel = model.fit(X, Y, epochs=250) #Treinamento
 
-_, accuracy = model.evaluate(X, Y)
-print('Accuracy: %.2f' % (accuracy*100))
+listAcc = list(seqModel.history['accuracy'])
+avgAcc = np.average(listAcc)
+
+listLoss = list(seqModel.history['loss'])
+avgLoss = np.average(listLoss)
+
+print('Treinamento:\nAcerto médio: %.2f ' % (avgAcc*100))
+print('Erro médio: %.2f ' % (avgLoss))
+
+
+print('\n\nCom base de treinamento:')
+loss, accuracy = model.evaluate(X, Y)
+print('Acerto: %.2f' % (accuracy*100))
+print('Erro: %.2f' % (loss))
+
+print('\n\nCom base de predição:')
+loss, accuracy = model.evaluate(Z, W)
+print('Acerto: %.2f' % (accuracy*100))
+print('Erro: %.2f' % (loss))
+predictions = model.predict_classes(Z)
+
+plotarResultados(listAcc,'Model accuracy', 'Accuracy', 'Epoch')
+plotarResultados(listLoss,'Model loss', 'Loss', 'Epoch')
 
 """PREDIÇÕES"""
 
@@ -64,7 +102,7 @@ for i in range(len(Y)):
 
 """ANALISE"""
 
-totaldados = len(X) #Total de linhas do csv
+totaldados = len(Xtotal) #Total de linhas do csv
 count = [0]*9 #Criação do vetor para armazenar a quantidade de vezes que o numero aparece na posição
 totalsoma = 0 #Somar todas os valores do count
 
@@ -73,7 +111,7 @@ print ("Total de dados:", totaldados)
 
 for coluna in range(9):
   for linha in range(totaldados):
-    result = ((X[linha][coluna])==1 and Y[linha]==1) #Se a posição for X e o resultado positivo
+    result = ((Xtotal[linha][coluna])==1 and Ytotal[linha]==1) #Se a posição for X e o resultado positivo
     count[coluna]=(count[coluna]+result)
 
 for i in range(9):
