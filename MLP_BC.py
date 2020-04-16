@@ -13,9 +13,9 @@ def plotagemDados(coluna, eixoX, labelX):
             eixoY.append(coluna.count(item))
     if eixoY.__len__() != aux.__len__():
         print('diferentes')
-    x = np.arange(eixoY.__len__())
-    plot.bar(x,eixoY)
-    plot.xticks(x, eixoX)
+    entradaTreino = np.arange(eixoY.__len__())
+    plot.bar(entradaTreino,eixoY)
+    plot.xticks(entradaTreino, eixoX)
     plot.title('Câncer de Mama')
     plot.ylabel('Quantidade')
     plot.xlabel(labelX)
@@ -29,14 +29,16 @@ def plotarResultados(resultado, titulo, ylabel, xlabel):
     plot.show()
 # Carrega todos os valores do arquivo para a variável.
 numpydados = loadtxt('breast-cancer.csv', delimiter=',')
-# [:, w] -> seleciona todas as linhas e coluna w
-# [x, w:y] -> seleciona a linha x e as colunas de w até y-1
-X = numpydados[:266,1:] # Valores de entrada, [linha, coluna]
-Z = numpydados[266:,1:]
-Y = numpydados[:266,0] # Valores de saida, [linha, coluna]
-W = numpydados[266:,0]
-# plot.bar(X, np.arange(1,13))
-# plotagem(list(X[:, 8]), ['Sim','Não'], 'Histórico de radioterapia')
+# [:, saidaTeste] -> seleciona todas as linhas e coluna saidaTeste
+# [entradaTreino, saidaTeste:saidaTreino] -> seleciona a linha entradaTreino e as colunas de saidaTeste até saidaTreino-1
+# Valores de entrada, [linha, coluna]
+entradaTreino = numpydados[:266,1:] 
+entradaTeste = numpydados[266:,1:]
+# Valores de saida, [linha, coluna]
+saidaTreino = numpydados[:266,0] 
+saidaTeste = numpydados[266:,0]
+# plot.bar(entradaTreino, np.arange(1,13))
+# plotagem(list(entradaTreino[:, 8]), ['Sim','Não'], 'Histórico de radioterapia')
 
 
 # Definição do modelo da rede neural, primeira camada com 12 neurônios, segunda com 4 e 1 de saída.
@@ -52,7 +54,7 @@ model.compile(optimizer=tf.keras.optimizers.Adamax(lr=0.11),
               metrics=['accuracy'])
 
 # Treinamento 
-history = model.fit(X, Y, epochs=197)   
+history = model.fit(entradaTreino, saidaTreino, epochs=197)   
 listAcc = list(history.history['acc'])
 avgAcc = np.average(listAcc)
 listLoss = list(history.history['loss'])
@@ -61,17 +63,17 @@ print('Treinamento:\nAcerto médio: %.2f ' % (avgAcc*100))
 print('Erro médio: %.2f ' % (avgLoss))
 # Resultados
 print('Com base de treinamento:')
-loss, accuracy = model.evaluate(X, Y)
+loss, accuracy = model.evaluate(entradaTreino, saidaTreino)
 print('Acerto: %.2f' % (accuracy*100))
 print('Erro: %.2f' % (loss))
 print('Com bas de predição:')
-loss, accuracy = model.evaluate(Z, W)
+loss, accuracy = model.evaluate(entradaTeste, saidaTeste)
 print('Acerto: %.2f' % (accuracy*100))
 print('Erro: %.2f' % (loss))
-predictions = model.predict_classes(Z)
+predictions = model.predict_classes(entradaTeste)
 # summarize the first 5 cases
-for i in range(len(Z)):
-	print('%s => %d (expected %d)' % (Z[i].tolist(), predictions[i], W[i]))
+for i in range(len(entradaTeste)):
+	print('%s => %d (expected %d)' % (entradaTeste[i].tolist(), predictions[i], saidaTeste[i]))
 
 plotarResultados(listAcc,'Model accuracy', 'Accuracy', 'Epoch')
 plotarResultados(listLoss,'Model loss', 'Loss', 'Epoch')
