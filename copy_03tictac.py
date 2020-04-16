@@ -26,6 +26,7 @@ import pandas as pd
 import numpy as np
 from numpy import loadtxt
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 """CATEGORIZANDO OS DADOS DE SAIDA"""
 
@@ -49,7 +50,7 @@ model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=0.12),
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(X, Y, epochs=200) #Treinamento
+model.fit(X, Y, epochs=250) #Treinamento
 
 _, accuracy = model.evaluate(X, Y)
 print('Accuracy: %.2f' % (accuracy*100))
@@ -81,3 +82,14 @@ for i in range(9):
 print (count[0], count[1], count[2], "------>", count[0]/totalsoma, count[1]/totalsoma, count[2]/totalsoma)
 print (count[3], count[4], count[5], "------>", count[3]/totalsoma, count[4]/totalsoma, count[5]/totalsoma)
 print (count[6], count[7], count[8], "------>", count[6]/totalsoma, count[7]/totalsoma, count[8]/totalsoma)
+
+"""GRAFICO"""
+
+posicoes = ['TL', 'TM', 'TR', 'ML', 'MM', 'MR', 'BL', 'BM', 'BR']
+
+plt.bar(posicoes, count, color="red")
+plt.xticks(posicoes)
+plt.ylabel('Quantidade de ocorrências')
+plt.xlabel('Posições')
+plt.title('Posiçõex X Quantidade de ocorrências')
+plt.show()
