@@ -71,13 +71,15 @@ totalsoma = 0 #Somar todas os valores do count
 
 print ("Total de dados:", totaldados)
 
-for colum in range(9):
-  for countcolum in range(totaldados):
-    result = ((X[countcolum][colum])==1 and Y[countcolum]==1) #Se a posição for X e o resultado positivo
-    count[colum]=(count[colum]+result)
+for coluna in range(9):
+  for linha in range(totaldados):
+    result = ((X[linha][coluna])==1 and Y[linha]==1) #Se a posição for X e o resultado positivo
+    count[coluna]=(count[coluna]+result)
 
 for i in range(9):
   totalsoma+=count[i]
+
+print('Total soma', totalsoma)
 
 print (count[0], count[1], count[2], "------>", count[0]/totalsoma, count[1]/totalsoma, count[2]/totalsoma)
 print (count[3], count[4], count[5], "------>", count[3]/totalsoma, count[4]/totalsoma, count[5]/totalsoma)
@@ -91,5 +93,5 @@ plt.bar(posicoes, count, color="red")
 plt.xticks(posicoes)
 plt.ylabel('Quantidade de ocorrências')
 plt.xlabel('Posições')
-plt.title('Posiçõex X Quantidade de ocorrências')
+plt.title('Posições X Quantidade de ocorrências')
 plt.show()
