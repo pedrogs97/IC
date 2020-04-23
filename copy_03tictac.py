@@ -28,15 +28,38 @@ from numpy import loadtxt
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+def plotarResultados(resultado, titulo, ylabel, xlabel):
+    plt.plot(resultado)
+    plt.title(titulo)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.show()
+
 """CATEGORIZANDO OS DADOS DE SAIDA"""
 
 numpydados = loadtxt('tic-tac-toe.csv', delimiter=",")
 
-X = numpydados[:,0:9] #Valores de entrada
-Y = numpydados[:,9] #Valores de saida
+Xtotal = numpydados[:,0:9] 
+Ytotal = numpydados[:,9] 
 
-print (X)
-print (Y)
+Xfit = np.concatenate((numpydados[0:208, :9], numpydados[626:737, :9]), axis=0) 
+Yfit = np.concatenate((numpydados[0:208, 9], numpydados[626:737, 9]), axis=0) 
+
+Xeva = np.concatenate((numpydados[208:417, :9], numpydados[737:847, :9]), axis=0)  
+Yeva = np.concatenate((numpydados[208:417, 9], numpydados[737:847, 9]), axis=0) 
+
+Xbase = np.concatenate((numpydados[417:626, :9], numpydados[847:958, :9]), axis=0)   
+Ybase = np.concatenate((numpydados[417:626, 9], numpydados[847:958, 9]), axis=0)  
+
+print (len(Xbase))
+print (len(Xeva))
+print (len(Xfit))
+
+
+
+# 1~208 + 627 ~ 737 -> Fit
+# 209~417 + 737 ~ 847 -> Eva
+# 418~626 + 848 ~ 958 -> basefit
 
 model = tf.keras.Sequential([
     tf.keras.layers.Dense(12, input_dim=9, activation=tf.nn.sigmoid),
@@ -50,30 +73,56 @@ model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=0.12),
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-model.fit(X, Y, epochs=250) #Treinamento
+seqModel = model.fit(Xfit, Yfit, epochs=250) #Treinamento
 
-_, accuracy = model.evaluate(X, Y)
-print('Accuracy: %.2f' % (accuracy*100))
+listAcc = list(seqModel.history['accuracy'])
+avgAcc = np.average(listAcc)
+
+listLoss = list(seqModel.history['loss'])
+avgLoss = np.average(listLoss)
+
+print('Treinamento:\nAcerto médio: %.2f ' % (avgAcc*100))
+print('Erro médio: %.2f ' % (avgLoss))
+
+
+print('\n\nCom base de treinamento:')
+loss, accuracy = model.evaluate(Xeva, Yeva)
+print('Acerto: %.2f' % (accuracy*100))
+print('Erro: %.2f' % (loss))
+
+plotarResultados(listAcc,'Model accuracy', 'Accuracy', 'Epoch')
+plotarResultados(listLoss,'Model loss', 'Loss', 'Epoch')
 
 """PREDIÇÕES"""
 
-predictions = model.predict_classes(X)
+predictions = model.predict_classes(Xbase)
 # summarize the first 5 cases
-for i in range(len(Y)):
-	print('%s => %d (expected %d)' % (X[i].tolist(), predictions[i], Y[i]))
+for i in range(len(Xbase)):
+	print('%s => %d (expected %d)' % (Xbase[i].tolist(), predictions[i], Ybase[i]))
 
 """ANALISE"""
 
-totaldados = len(X) #Total de linhas do csv
+positive = 0;
+negative = 0;
+
+totaldados = len(Xtotal) #Total de linhas do csv
+print ("Total de dados:", totaldados)
+
+for i in range(len(Ytotal)):
+  if(Ytotal[i])==1:
+    positive+=1
+  else:
+    negative+=1
+
+print('Positivo', positive, positive/len(Ytotal))
+print('Negativo', negative, negative/len(Ytotal))
+
 count = [0]*9 #Criação do vetor para armazenar a quantidade de vezes que o numero aparece na posição
 totalsoma = 0 #Somar todas os valores do count
 
-
-print ("Total de dados:", totaldados)
-
 for coluna in range(9):
   for linha in range(totaldados):
-    result = ((X[linha][coluna])==1 and Y[linha]==1) #Se a posição for X e o resultado positivo
+    result = ((Xtotal[linha][coluna])==1 and Ytotal[linha]==1) #Se a posição for X e o resultado positivo
     count[coluna]=(count[coluna]+result)
 
 for i in range(9):
