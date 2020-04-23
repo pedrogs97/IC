@@ -102,12 +102,23 @@ for i in range(len(Y)):
 
 """ANALISE"""
 
+positive = 0;
+negative = 0;
+
 totaldados = len(Xtotal) #Total de linhas do csv
+print ("Total de dados:", totaldados)
+
+for i in range(len(Ytotal)):
+  if(Ytotal[i])==1:
+    positive+=1
+  else:
+    negative+=1
+
+print('Positivo', positive, positive/len(Ytotal))
+print('Negativo', negative, negative/len(Ytotal))
+
 count = [0]*9 #Criação do vetor para armazenar a quantidade de vezes que o numero aparece na posição
 totalsoma = 0 #Somar todas os valores do count
-
-
-print ("Total de dados:", totaldados)
 
 for coluna in range(9):
   for linha in range(totaldados):
