@@ -39,21 +39,27 @@ def plotarResultados(resultado, titulo, ylabel, xlabel):
 
 numpydados = loadtxt('tic-tac-toe.csv', delimiter=",")
 
-Xtotal = numpydados[:,0:9] #Valores de entrada
-Ytotal = numpydados[:,9] #Valores de saida
+Xtotal = numpydados[:,0:9] 
+Ytotal = numpydados[:,9] 
 
-X = numpydados[0:897, :9] #Valores de entrada
-Y = numpydados[0:897, 9] #Valores de saida
+Xfit = np.concatenate((numpydados[0:208, :9], numpydados[626:737, :9]), axis=0) 
+Yfit = np.concatenate((numpydados[0:208, 9], numpydados[626:737, 9]), axis=0) 
 
-Z = numpydados[898: , :9] #Valores de entrada
-W = numpydados[898: , 9] #Valores de saida
+Xeva = np.concatenate((numpydados[208:417, :9], numpydados[737:847, :9]), axis=0)  
+Yeva = np.concatenate((numpydados[208:417, 9], numpydados[737:847, 9]), axis=0) 
+
+Xbase = np.concatenate((numpydados[417:626, :9], numpydados[847:958, :9]), axis=0)   
+Ybase = np.concatenate((numpydados[417:626, 9], numpydados[847:958, 9]), axis=0)  
+
+print (len(Xbase))
+print (len(Xeva))
+print (len(Xfit))
 
 
-# 1  -> 897 - Treinamento
-# 898-> EOF - Teste
 
-print (X)
-print (Y)
+# 1~208 + 627 ~ 737 -> Fit
+# 209~417 + 737 ~ 847 -> Eva
+# 418~626 + 848 ~ 958 -> basefit
 
 model = tf.keras.Sequential([
     tf.keras.layers.Dense(12, input_dim=9, activation=tf.nn.sigmoid),
@@ -67,7 +73,7 @@ model.compile(optimizer=tf.keras.optimizers.RMSprop(lr=0.12),
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
-seqModel = model.fit(X, Y, epochs=250) #Treinamento
+seqModel = model.fit(Xfit, Yfit, epochs=250) #Treinamento
 
 listAcc = list(seqModel.history['accuracy'])
 avgAcc = np.average(listAcc)
@@ -80,25 +86,19 @@ print('Erro médio: %.2f ' % (avgLoss))
 
 
 print('\n\nCom base de treinamento:')
-loss, accuracy = model.evaluate(X, Y)
+loss, accuracy = model.evaluate(Xeva, Yeva)
 print('Acerto: %.2f' % (accuracy*100))
 print('Erro: %.2f' % (loss))
-
-print('\n\nCom base de predição:')
-loss, accuracy = model.evaluate(Z, W)
-print('Acerto: %.2f' % (accuracy*100))
-print('Erro: %.2f' % (loss))
-predictions = model.predict_classes(Z)
 
 plotarResultados(listAcc,'Model accuracy', 'Accuracy', 'Epoch')
 plotarResultados(listLoss,'Model loss', 'Loss', 'Epoch')
 
 """PREDIÇÕES"""
 
-predictions = model.predict_classes(X)
+predictions = model.predict_classes(Xbase)
 # summarize the first 5 cases
-for i in range(len(Y)):
-	print('%s => %d (expected %d)' % (X[i].tolist(), predictions[i], Y[i]))
+for i in range(len(Xbase)):
+	print('%s => %d (expected %d)' % (Xbase[i].tolist(), predictions[i], Ybase[i]))
 
 """ANALISE"""
 
